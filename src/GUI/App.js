@@ -1,9 +1,10 @@
 import './App.css';
+import NameChooser from "./Components/NameChooser.js";
 
 function App() {
     return (
         <div className="App">
-            <p>Paragraph here</p>
+            <NameChooser/>
         </div>
     );
 }

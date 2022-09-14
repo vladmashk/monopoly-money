@@ -1,0 +1,11 @@
+#ncLabel {
+    margin-bottom: 3px;
+}
+
+#nameInput {
+    margin-bottom: 4px;
+}
+
+.error {
+    color: red;
+}
