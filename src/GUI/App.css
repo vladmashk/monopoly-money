@@ -12,3 +12,7 @@
     width: 50ch;
     max-width: 90vw;
 }
+
+.error {
+    color: red;
+}

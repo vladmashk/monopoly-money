@@ -6,10 +6,6 @@
     margin-bottom: 4px;
 }
 
-.error {
-    color: red;
-}
-
 #buttonDiv {
     display: flex;
     justify-content: flex-end;
