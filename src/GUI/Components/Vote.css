@@ -1,0 +1,18 @@
+#buttonsDiv {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.agree {
+    color: green;
+    border: 1px outset green;
+}
+
+.disagree {
+    color: red;
+    border: 1px outset red;
+}
+
+.vote {
+    margin-bottom: 12px;
+}

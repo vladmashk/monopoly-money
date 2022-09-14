@@ -13,6 +13,16 @@
     max-width: 90vw;
 }
 
+.centeredFlex {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.doubleBorder {
+    border: 3px double orange;
+}
+
 .error {
     color: red;
 }

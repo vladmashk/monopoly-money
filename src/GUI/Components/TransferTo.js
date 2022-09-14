@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import {client} from "../../index.js";
 import {useEffect, useState} from "react";
 import "./TransferTo.css";
@@ -32,7 +31,9 @@ function TransferTo(props) {
         }
         if (!client.transferTo(amount, recipient)) {
             setError("Transfer failed");
+            return;
         }
+        setTransferAmount("");
     }
 
     return (
@@ -42,7 +43,7 @@ function TransferTo(props) {
                 {otherPlayers.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
             <label htmlFor="transferToAmount"><b>amount:</b></label>
-            <input id="transferToAmount" type="number" min={1} value={transferAmount} onChange={e => setTransferAmount(e.target.value)}/>
+            <input id="transferToAmount" type="number" min={1} placeholder="Enter amount to transfer" value={transferAmount} onChange={e => setTransferAmount(e.target.value)}/>
             <button onClick={() => transfer()}>Transfer</button>
             {error && <span className="error">{error}</span>}
         </div>

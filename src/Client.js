@@ -23,13 +23,19 @@ class Client {
             this.socket.disconnect();
         })
 
-        this.socket.on("connect", () => {
-            setTimeout(() => this.onConnect(), 1000);
-        });
-
         this.socket.on(comm.UPDATE_MONEY, (money) => this.setMoney(money));
 
         this.socket.on(comm.UPDATE_PLAYERS, (players) => this.setPlayers(players));
+
+        this.socket.on(comm.START_VOTE, ({id, recipient, amount}) => {
+            if (recipient !== this.name) {
+                this.startVote(id, recipient, amount);
+            }
+        });
+
+        this.socket.on(comm.END_VOTE, (id) => {
+            this.endVote(id);
+        });
     }
 
     /**
@@ -37,10 +43,6 @@ class Client {
      */
     getOtherPlayers() {
         return this.players.filter(p => p !== this.name);
-    }
-
-    onConnect() {
-
     }
 
     /**
@@ -71,6 +73,19 @@ class Client {
         return true;
     }
 
+    transferFromBank(amount) {
+        this.socket.emit(comm.TRANSFER, {amount: amount, from: "Bank", to: this.name});
+    }
+
+    /**
+     *
+     * @param {number} id
+     * @param {boolean} vote
+     */
+    playerVote(id, vote) {
+        this.socket.emit(comm.VOTE, {id, vote});
+    }
+
     /**
      * @param {number} money
      */
@@ -90,6 +105,20 @@ class Client {
     updateMoney(money) {}
 
     updatePlayers(players) {}
+
+    /**
+     *
+     * @param {number} id
+     * @param {string} recipient
+     * @param {number} amount
+     */
+    startVote(id, recipient, amount) {}
+
+    /**
+     *
+     * @param {number} id
+     */
+    endVote(id) {}
 }
 
 export default Client;

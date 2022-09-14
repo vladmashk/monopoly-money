@@ -1,8 +1,9 @@
 import comm from "../src/comm.js";
+import startingAmount from "../src/startingAmount.js";
 
 class Player {
 
-    money = 0;
+    money = startingAmount;
 
     connected = true;
 
@@ -10,13 +11,6 @@ class Player {
      * @type {Socket}
      */
     socket;
-
-    isBank = false;
-
-    constructor(money, isBank = false) {
-        this.money = money;
-        this.isBank = isBank;
-    }
 
     isConnected() {
         return this.connected;
@@ -39,15 +33,15 @@ class Player {
     }
 
     updateMoney() {
-        if (!this.isBank) {
-            this.socket.emit(comm.UPDATE_MONEY, this.money);
-        }
+        this.socket.emit(comm.UPDATE_MONEY, this.money);
     }
 
     updatePlayers(players) {
-        if (!this.isBank) {
-            this.socket.emit(comm.UPDATE_PLAYERS, players);
-        }
+        this.socket.emit(comm.UPDATE_PLAYERS, players);
+    }
+
+    emit(event, args, ack = undefined) {
+        this.socket.emit(event, args, ack);
     }
 }
 
