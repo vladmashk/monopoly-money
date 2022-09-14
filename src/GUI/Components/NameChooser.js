@@ -12,10 +12,14 @@ function NameChooser(props) {
     const [error, setError] = useState("");
 
     function choose(name) {
+        if (name === "") {
+            return;
+        }
         client.addPlayer(name).then(result => {
             if (result) {
                 setError("")
                 setVisible(false);
+                props.setName(name);
             } else {
                 setError("Try another name.");
             }
@@ -27,7 +31,9 @@ function NameChooser(props) {
             <div className="box">
                 <label htmlFor="nameInput" id="ncLabel">Choose name:</label>
                 <input id="nameInput" placeholder="Enter name here" value={name} onChange={e => setName(e.target.value)}/>
-                <button onClick={() => choose(name)}>Select</button>
+                <div id="buttonDiv">
+                    <button onClick={() => choose(name)}>Select</button>
+                </div>
                 {error && <span className="error">{error}</span>}
             </div>
         );
@@ -35,7 +41,7 @@ function NameChooser(props) {
 }
 
 NameChooser.propTypes = {
-
+    setName: PropTypes.func
 };
 
 export default NameChooser;

@@ -1,0 +1,9 @@
+#Main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#moneyCounter {
+    font-size: 2em;
+}

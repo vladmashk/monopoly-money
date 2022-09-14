@@ -9,3 +9,8 @@
 .error {
     color: red;
 }
+
+#buttonDiv {
+    display: flex;
+    justify-content: flex-end;
+}

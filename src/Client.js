@@ -15,7 +15,9 @@ class Client {
 
         this.socket.on("connect", () => {
             setTimeout(() => this.onConnect(), 1000);
-        })
+        });
+
+        this.socket.on(comm.UPDATE_MONEY, (money) => this.setMoney(money));
     }
 
     onConnect() {
@@ -33,6 +35,20 @@ class Client {
             });
         })
     }
+
+    /**
+     * @param {number} money
+     */
+    setMoney(money) {
+        this.money = money;
+        this.updateMoney(money);
+    }
+
+
+    /**
+     * @param {number} money
+     */
+    updateMoney(money) {}
 }
 
 export default Client;

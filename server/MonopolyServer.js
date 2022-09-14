@@ -14,14 +14,20 @@ class MonopolyServer {
     /**
      * @type {Map<string, Player>}
      */
-    players = new Map([["Bank", new Player(Math.floor(Number.MAX_SAFE_INTEGER / 2))]]);
+    players = new Map([["Bank", new Player(Math.floor(Number.MAX_SAFE_INTEGER / 2), true)]]);
 
     constructor() {
         this.server.on("connection", (socket) => {
             console.log("Client connected:", socket.id, socket.handshake.address);
 
             socket.on(comm.ADD_PLAYER, (name, respond) => {
-                respond(this.addPlayer(name));
+                const result = this.addPlayer(name);
+                respond(result);
+                if (result) {
+                    const player = this.players.get(name);
+                    socket.emit(comm.UPDATE_MONEY, player.money);
+                    player.socket = socket;
+                }
             });
 
         });
@@ -35,7 +41,6 @@ class MonopolyServer {
      * @return {boolean}
      */
     addPlayer(name) {
-        console.log("Add player", name);
         if (this.players.has(name) && this.players.get(name).isConnected()) {
             return false;
         } else if (this.players.has(name)) {

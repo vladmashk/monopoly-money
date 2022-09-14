@@ -5,8 +5,16 @@ class Player {
 
     connected = true;
 
-    constructor(money) {
+    /**
+     * @type {Socket}
+     */
+    socket;
+
+    isBank = false;
+
+    constructor(money, isBank = false) {
         this.money = money;
+        this.isBank = isBank;
     }
 
     isConnected() {
