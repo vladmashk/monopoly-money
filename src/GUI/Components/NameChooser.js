@@ -5,8 +5,6 @@ import {client} from "../../index.js";
 
 function NameChooser(props) {
 
-    const [visible, setVisible] = useState(true);
-
     const [name, setName] = useState("");
 
     const [error, setError] = useState("");
@@ -17,8 +15,7 @@ function NameChooser(props) {
         }
         client.addPlayer(name).then(result => {
             if (result) {
-                setError("")
-                setVisible(false);
+                setError("");
                 props.setName(name);
             } else {
                 setError("Try another name.");
@@ -26,16 +23,14 @@ function NameChooser(props) {
         });
     }
 
-    if (visible) {
-        return (
-            <div className="box">
-                <label htmlFor="nameInput" id="ncLabel">Choose name:</label>
-                <input id="nameInput" placeholder="Enter name here" value={name} onChange={e => setName(e.target.value)}/>
-                <button onClick={() => choose(name)}>Select</button>
-                {error && <span className="error">{error}</span>}
-            </div>
-        );
-    }
+    return (
+        <div className="box">
+            <label htmlFor="nameInput" id="ncLabel">Choose name:</label>
+            <input id="nameInput" placeholder="Enter name here" value={name} onChange={e => setName(e.target.value)}/>
+            <button onClick={() => choose(name)}>Select</button>
+            {error && <span className="error">{error}</span>}
+        </div>
+    );
 }
 
 NameChooser.propTypes = {

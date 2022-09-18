@@ -39,17 +39,23 @@ class Server {
 
             socket.on(comm.ADD_PLAYER, (name, respond) => {
                 const result = this.addPlayer(name);
+                respond(result);
                 if (result) {
                     const player = this.players.get(name);
                     player.socket = socket;
-                    this.updateMoney(player);
-                    this.updatePlayers();
+                    setTimeout(() => {
+                        this.updateMoney(player);
+                        this.updatePlayers();
+                    }, 100);
                 }
-                respond(result);
 
                 socket.on(comm.VOTE, ({id, vote}) => {
                     this.playerVoted(name, id, vote);
-                })
+                });
+
+                socket.on(comm.REQUEST_UPDATE_MONEY, () => {
+                    this.updateMoney(this.players.get(name));
+                });
             });
 
             socket.on("disconnect", () => {
@@ -134,7 +140,7 @@ class Server {
         for (const player of this.players.values()) {
             player.emit(comm.START_VOTE, {id, amount, recipient});
         }
-        setTimeout(() => this.endVote(id), 20 * 1000);
+        setTimeout(() => this.endVote(id), 15 * 1000);
         console.log("Started vote", id);
     }
 
@@ -183,8 +189,10 @@ class Server {
      */
     updateMoney(player) {
         player.updateMoney();
-        this.savedMoney[player.name] = player.money;
-        this.writeSavedMoney();
+        if (player.name !== "Bank") {
+            this.savedMoney[player.name] = player.money;
+            this.writeSavedMoney();
+        }
     }
 
     updatePlayers() {

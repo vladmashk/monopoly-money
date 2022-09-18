@@ -2,6 +2,8 @@ import Player from "./Player.js";
 
 class Bank extends Player {
 
+    name = "Bank";
+
     canReduceMoneyBy(amount) {
         return true;
     }

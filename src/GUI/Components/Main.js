@@ -2,16 +2,15 @@ import PropTypes from 'prop-types';
 import "./Main.css";
 import {useEffect, useState} from "react";
 import TransferTo from "./TransferTo.js";
-import startingAmount from "../../startingAmount.js";
 import {client} from "../../index.js";
 import Vote from "./Vote.js";
 import TransferFrom from "./TransferFrom.js";
 
 function Main(props) {
 
-    const [money, setMoney] = useState(startingAmount);
+    const [money, setMoney] = useState(-1);
 
-    const [votes, setVotes] = useState([]);
+    const [votes, setVotes] = useState([<Vote key={1} id={1} recipient={"Tim"} amount={50}/>]);
 
     useEffect(() => {
         client.updateMoney = updateMoney;
@@ -20,6 +19,7 @@ function Main(props) {
     }, []);
 
     function updateMoney(money) {
+        console.log("Updated money GUI")
         setMoney(money);
     }
 
@@ -29,7 +29,7 @@ function Main(props) {
      * @param {number} amount
      */
     function startVote(id, recipient, amount) {
-        setVotes(votes => votes.concat([<Vote key={id} id={id} recipient={recipient} amount={amount}/>]));
+        setVotes(votes => [<Vote key={id} id={id} recipient={recipient} amount={amount}/>].concat(votes));
     }
 
     /**
@@ -45,7 +45,9 @@ function Main(props) {
             <span>You are</span>
             <p><b>{props.name}</b></p>
             <span>You have</span>
-            <span id="moneyCounter">{money}</span>
+            <span id="moneyCounter" onClick={() => client.requestUpdateMoney()} title="Refresh money amount">
+                {money.toLocaleString("fr", {notation: "standard"})}
+            </span>
             <TransferTo/>
             <br/>
             <TransferFrom/>

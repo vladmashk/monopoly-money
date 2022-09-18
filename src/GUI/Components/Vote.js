@@ -16,12 +16,12 @@ function Vote(props) {
         return (
             <div className="box doubleBorder vote">
                 <div className="centeredFlex">
-                    <b>Vote</b>
-                    <p>Should <b>{props.recipient}</b> receive <b>{props.amount}</b> from the bank?</p>
+                    <b className="voteTitle">Vote</b>
+                    <p>Should <b>{props.recipient}</b> receive <b>{props.amount.toLocaleString("fr")}</b> from the bank?</p>
                 </div>
                 <div id="buttonsDiv">
-                    <button className="agree" onClick={() => vote(true)}>Agree</button>
-                    <button className="disagree" onClick={() => vote(false)}>Disagree</button>
+                    <button className="agree" onClick={() => vote(true)}>Yes</button>
+                    <button className="disagree" onClick={() => vote(false)}>No</button>
                 </div>
             </div>
         );

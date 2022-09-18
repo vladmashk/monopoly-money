@@ -21,7 +21,11 @@ class Client {
         this.socket.on("connect_error", () => {
             console.error("Couldn't connect!");
             this.socket.disconnect();
-        })
+        });
+
+        this.socket.on("connect", () => {
+            console.log("Connected to server!");
+        });
 
         this.socket.on(comm.UPDATE_MONEY, (money) => this.setMoney(money));
 
@@ -75,6 +79,10 @@ class Client {
 
     transferFromBank(amount) {
         this.socket.emit(comm.TRANSFER, {amount: amount, from: "Bank", to: this.name});
+    }
+
+    requestUpdateMoney() {
+        this.socket.emit(comm.REQUEST_UPDATE_MONEY);
     }
 
     /**

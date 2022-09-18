@@ -1,6 +1,17 @@
 #buttonsDiv {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: space-around;
+    padding-bottom: 3px;
+}
+
+#buttonsDiv button {
+    width: 6ch;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+#buttonsDiv button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 .agree {
@@ -15,4 +26,12 @@
 
 .vote {
     margin-bottom: 12px;
+}
+
+.doubleBorder {
+    border: 3px double purple;
+}
+
+.voteTitle {
+    font-size: large;
 }

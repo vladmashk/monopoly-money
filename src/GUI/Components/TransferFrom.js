@@ -2,16 +2,26 @@ import "./TransferFrom.css"
 import {useState} from "react";
 import {client} from "../../index.js";
 
-function TransferFrom(props) {
+function TransferFrom() {
 
     const [transferAmount, setTransferAmount] = useState("");
 
+    const [error, setError] = useState("");
+
+    function showError(text) {
+        setError(text);
+        setTimeout(() => setError(""), 1000);
+    }
+
     function transfer() {
-        if (transferAmount === "") {
+        setError("");
+        if (transferAmount === "" || transferAmount.includes(".")) {
+            showError("Invalid amount");
             return;
         }
         const amount = parseInt(transferAmount);
-        if (isNaN(amount) || amount === 0) {
+        if (isNaN(amount) || amount <= 0) {
+            showError("Invalid amount");
             return;
         }
         client.transferFromBank(amount);
@@ -29,6 +39,7 @@ function TransferFrom(props) {
                    value={transferAmount}
                    onChange={e => setTransferAmount(e.target.value)}/>
             <button onClick={() => transfer()}>Start vote</button>
+            {error && <span className="error">{error}</span>}
         </div>
     );
 }

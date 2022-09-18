@@ -2,7 +2,7 @@ import {client} from "../../index.js";
 import {useEffect, useState} from "react";
 import "./TransferTo.css";
 
-function TransferTo(props) {
+function TransferTo() {
 
     const [otherPlayers, setOtherPlayers] = useState(client.getOtherPlayers());
 
@@ -20,17 +20,24 @@ function TransferTo(props) {
         setOtherPlayers(p => players);
     }
 
+    function showError(text) {
+        setError(text);
+        setTimeout(() => setError(""), 1000);
+    }
+
     function transfer() {
         setError("");
-        if (transferAmount === "") {
+        if (transferAmount === "" || transferAmount.includes(".")) {
+            showError("Invalid amount");
             return;
         }
         const amount = parseInt(transferAmount);
-        if (isNaN(amount) || amount === 0) {
+        if (isNaN(amount) || amount <= 0) {
+            showError("Invalid amount");
             return;
         }
         if (!client.transferTo(amount, recipient)) {
-            setError("Transfer failed");
+            showError("Transfer failed");
             return;
         }
         setTransferAmount("");

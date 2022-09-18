@@ -25,10 +25,6 @@
     align-items: center;
 }
 
-.doubleBorder {
-    border: 3px double orange;
-}
-
 .error {
     color: red;
 }
