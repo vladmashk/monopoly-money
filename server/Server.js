@@ -27,11 +27,11 @@ class Server {
     /**
      * @type {object}
      */
-    savedMoney = {};
+    savedState = {};
 
     constructor() {
         if (fs.existsSync(savedPath)) {
-            this.savedMoney = JSON.parse(fs.readFileSync(savedPath).toString());
+            this.savedState = JSON.parse(fs.readFileSync(savedPath).toString());
         }
 
         this.server.on("connection", (socket) => {
@@ -44,17 +44,12 @@ class Server {
                     const player = this.players.get(name);
                     player.socket = socket;
                     setTimeout(() => {
-                        this.updateMoney(player);
-                        this.updatePlayers();
+                        this.updateState();
                     }, 100);
                 }
 
                 socket.on(comm.VOTE, ({id, vote}) => {
                     this.playerVoted(name, id, vote);
-                });
-
-                socket.on(comm.REQUEST_UPDATE_MONEY, () => {
-                    this.updateMoney(this.players.get(name));
                 });
             });
 
@@ -64,7 +59,11 @@ class Server {
                     return;
                 }
                 leaver.setConnected(false);
-                this.updatePlayers();
+                this.updateState();
+            });
+
+            socket.on(comm.REQUEST_UPDATE_STATE, () => {
+                this.updateState();
             });
 
             socket.on(comm.TRANSFER, ({ amount, from, to }) => {
@@ -77,13 +76,6 @@ class Server {
     }
 
     /**
-     * @return {string[]}
-     */
-    getPlayerNames() {
-        return [...this.players.keys()].filter(n => this.players.get(n).isConnected());
-    }
-
-    /**
      * @param {string} name
      * @return {boolean}
      */
@@ -92,8 +84,8 @@ class Server {
             return false;
         } else if (this.players.has(name)) {
             this.players.get(name).setConnected(true);
-        } else if (this.savedMoney[name]) {
-            this.players.set(name, new Player(name, this.savedMoney[name]));
+        } else if (this.savedState[name]) {
+            this.players.set(name, new Player(name, this.savedState[name]));
         } else {
             this.players.set(name, new Player(name));
         }
@@ -125,9 +117,8 @@ class Server {
         const payer = this.players.get(from);
         const payee = this.players.get(to);
         payer.reduceMoneyBy(amount);
-        this.updateMoney(payer);
         payee.increaseMoneyBy(amount);
-        this.updateMoney(payee);
+        this.updateState();
     }
 
     /**
@@ -135,6 +126,10 @@ class Server {
      * @param {string} recipient
      */
     startVote(amount, recipient) {
+        if (this.getActivePlayersAmount() === 1) {
+            this.actualTransfer(amount, "Bank", recipient);
+            return;
+        }
         const id = Math.round(Math.random() * Number.MAX_SAFE_INTEGER);
         this.votesInProgress.set(id, new Vote(amount, recipient));
         for (const player of this.players.values()) {
@@ -175,34 +170,40 @@ class Server {
         const onGoingVote = this.votesInProgress.get(id);
         onGoingVote.vote(vote);
         console.log(voter, "voted", vote, "in vote", id);
-        if (onGoingVote.totalVotes() === this.getActivePlayersAmount() - 2) {
+        if (onGoingVote.totalVotes() === this.getActivePlayersAmount() - 1) {
             this.endVote(id);
         }
     }
 
+    /**
+     * Excluding bank
+     * @return {number}
+     */
     getActivePlayersAmount() {
-        return [...this.players.values()].filter(p => p.isConnected()).length;
+        return [...this.players.values()].filter(p => p.isConnected() && p.name !== "Bank").length;
     }
 
     /**
-     * @param {Player} player
+     * @return {Object}
      */
-    updateMoney(player) {
-        player.updateMoney();
-        if (player.name !== "Bank") {
-            this.savedMoney[player.name] = player.money;
-            this.writeSavedMoney();
-        }
-    }
-
-    updatePlayers() {
+    getActiveState() {
+        let activeState = {};
         for (const player of this.players.values()) {
-            player.updatePlayers(this.getPlayerNames());
+            if (player.isConnected()) {
+                activeState[player.name] = player.money;
+            }
         }
+        return activeState;
     }
 
-    writeSavedMoney() {
-        fs.writeFile(savedPath, JSON.stringify(this.savedMoney, null, 2), (err) => {
+    updateState() {
+        for (const player of this.players.values()) {
+            if (player.name === "Bank")
+                continue;
+            player.updateState(this.getActiveState());
+            this.savedState[player.name] = player.money;
+        }
+        fs.writeFile(savedPath, JSON.stringify(this.savedState, null, 2), (err) => {
             if (err) {
                 console.log(err);
             }

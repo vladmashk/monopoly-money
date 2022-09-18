@@ -14,3 +14,7 @@ code {
 button {
     width: fit-content;
 }
+
+input {
+    font-size: 16px;
+}

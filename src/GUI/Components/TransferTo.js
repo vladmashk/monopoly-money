@@ -1,24 +1,15 @@
 import {client} from "../../index.js";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import "./TransferTo.css";
+import PropTypes from "prop-types";
 
-function TransferTo() {
-
-    const [otherPlayers, setOtherPlayers] = useState(client.getOtherPlayers());
+function TransferTo(props) {
 
     const [recipient, setRecipient] = useState("Bank");
 
     const [transferAmount, setTransferAmount] = useState("");
 
     const [error, setError] = useState("");
-
-    useEffect(() => {
-        client.updatePlayers = updatePlayers;
-    }, []);
-
-    function updatePlayers(players) {
-        setOtherPlayers(p => players);
-    }
 
     function showError(text) {
         setError(text);
@@ -48,7 +39,7 @@ function TransferTo() {
             <div>
                 <label id="recipientLabel" htmlFor="recipientSelect"><b>Transfer to</b></label>
                 <select id="recipientSelect" onChange={e => setRecipient(e.target.value)} defaultValue={"Bank"}>
-                    {otherPlayers.map(p => <option key={p} value={p}>{p}</option>)}
+                    {props.otherPlayers.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
             </div>
             <input id="transferToAmount"
@@ -65,7 +56,7 @@ function TransferTo() {
 }
 
 TransferTo.propTypes = {
-
+    otherPlayers: PropTypes.arrayOf(PropTypes.string)
 };
 
 export default TransferTo;

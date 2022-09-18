@@ -2,7 +2,9 @@ import Player from "./Player.js";
 
 class Bank extends Player {
 
-    name = "Bank";
+    constructor() {
+        super("Bank", 0);
+    }
 
     canReduceMoneyBy(amount) {
         return true;
@@ -16,11 +18,7 @@ class Bank extends Player {
 
     }
 
-    updateMoney() {
-
-    }
-
-    updatePlayers(players) {
+    updateState(state) {
 
     }
 

@@ -42,12 +42,11 @@ class Player {
         this.money -= amount;
     }
 
-    updateMoney() {
-        this.socket.emit(comm.UPDATE_MONEY, this.money);
-    }
-
-    updatePlayers(players) {
-        this.socket.emit(comm.UPDATE_PLAYERS, players);
+    /**
+     * @param {Object} state
+     */
+    updateState(state) {
+        this.socket.emit(comm.UPDATE_STATE, state);
     }
 
     emit(event, args, ack = undefined) {
