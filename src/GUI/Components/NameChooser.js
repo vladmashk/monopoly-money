@@ -31,9 +31,7 @@ function NameChooser(props) {
             <div className="box">
                 <label htmlFor="nameInput" id="ncLabel">Choose name:</label>
                 <input id="nameInput" placeholder="Enter name here" value={name} onChange={e => setName(e.target.value)}/>
-                <div id="buttonDiv">
-                    <button onClick={() => choose(name)}>Select</button>
-                </div>
+                <button onClick={() => choose(name)}>Select</button>
                 {error && <span className="error">{error}</span>}
             </div>
         );

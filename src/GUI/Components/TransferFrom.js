@@ -21,7 +21,13 @@ function TransferFrom(props) {
     return (
         <div className="box">
             <label htmlFor="transferFromAmount"><b>Transfer from bank</b></label>
-            <input id="transferFromAmount" type="number" min={1} placeholder="Enter amount to transfer" value={transferAmount} onChange={e => setTransferAmount(e.target.value)}/>
+            <input id="transferFromAmount"
+                   className="amountInput"
+                   type="number"
+                   min={1}
+                   placeholder="Enter amount to transfer"
+                   value={transferAmount}
+                   onChange={e => setTransferAmount(e.target.value)}/>
             <button onClick={() => transfer()}>Start vote</button>
         </div>
     );

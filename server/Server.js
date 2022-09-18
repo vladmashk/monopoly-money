@@ -1,15 +1,18 @@
-import { Server } from "socket.io";
+import * as fs from "fs";
+import { Server as SocketServer } from "socket.io";
 import ip from "ip"
 import comm from "../src/comm.js";
 import Player from "./Player.js";
 import Bank from "./Bank.js";
 import Vote from "./Vote.js";
 
-class MonopolyServer {
+const savedPath = "./saved.json";
+
+class Server {
 
     port = 3001;
 
-    server = new Server({cors: {origin: ["http://localhost:3000", `http://${ip.address()}:3000`]}});
+    server = new SocketServer({cors: {origin: ["http://localhost:3000", `http://${ip.address()}:3000`]}});
 
     /**
      * @type {Map<string, Player>}
@@ -21,7 +24,16 @@ class MonopolyServer {
      */
     votesInProgress = new Map();
 
+    /**
+     * @type {object}
+     */
+    savedMoney = {};
+
     constructor() {
+        if (fs.existsSync(savedPath)) {
+            this.savedMoney = JSON.parse(fs.readFileSync(savedPath).toString());
+        }
+
         this.server.on("connection", (socket) => {
             console.log("Client connected:", socket.id, socket.handshake.address);
 
@@ -29,8 +41,8 @@ class MonopolyServer {
                 const result = this.addPlayer(name);
                 if (result) {
                     const player = this.players.get(name);
-                    socket.emit(comm.UPDATE_MONEY, player.money);
                     player.socket = socket;
+                    this.updateMoney(player);
                     this.updatePlayers();
                 }
                 respond(result);
@@ -74,8 +86,10 @@ class MonopolyServer {
             return false;
         } else if (this.players.has(name)) {
             this.players.get(name).setConnected(true);
+        } else if (this.savedMoney[name]) {
+            this.players.set(name, new Player(name, this.savedMoney[name]));
         } else {
-            this.players.set(name, new Player());
+            this.players.set(name, new Player(name));
         }
         return true;
     }
@@ -105,9 +119,9 @@ class MonopolyServer {
         const payer = this.players.get(from);
         const payee = this.players.get(to);
         payer.reduceMoneyBy(amount);
-        payer.updateMoney()
+        this.updateMoney(payer);
         payee.increaseMoneyBy(amount);
-        payee.updateMoney();
+        this.updateMoney(payee);
     }
 
     /**
@@ -164,11 +178,28 @@ class MonopolyServer {
         return [...this.players.values()].filter(p => p.isConnected()).length;
     }
 
+    /**
+     * @param {Player} player
+     */
+    updateMoney(player) {
+        player.updateMoney();
+        this.savedMoney[player.name] = player.money;
+        this.writeSavedMoney();
+    }
+
     updatePlayers() {
         for (const player of this.players.values()) {
             player.updatePlayers(this.getPlayerNames());
         }
     }
+
+    writeSavedMoney() {
+        fs.writeFile(savedPath, JSON.stringify(this.savedMoney, null, 2), (err) => {
+            if (err) {
+                console.log(err);
+            }
+        });
+    }
 }
 
-new MonopolyServer();
+new Server();

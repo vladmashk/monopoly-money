@@ -4,10 +4,16 @@
     align-items: center;
 }
 
+.AppMiddle {
+    justify-content: center;
+    min-height: 80vh;
+}
+
 .box {
     display: flex;
     flex-direction: column;
     border: 1px solid black;
+    border-radius: 8px;
     padding: 4px;
     width: 50ch;
     max-width: 90vw;
@@ -25,4 +31,9 @@
 
 .error {
     color: red;
+}
+
+.amountInput {
+    margin-top: 5px;
+    margin-bottom: 5px;
 }

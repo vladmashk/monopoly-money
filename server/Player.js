@@ -3,7 +3,12 @@ import startingAmount from "../src/startingAmount.js";
 
 class Player {
 
-    money = startingAmount;
+    /**
+     * @type {string}
+     */
+    name;
+
+    money = 0;
 
     connected = true;
 
@@ -11,6 +16,11 @@ class Player {
      * @type {Socket}
      */
     socket;
+
+    constructor(name, money = startingAmount) {
+        this.name = name;
+        this.money = money;
+    }
 
     isConnected() {
         return this.connected;

@@ -38,12 +38,19 @@ function TransferTo(props) {
 
     return (
         <div className="box">
-            <label htmlFor="recipientSelect"><b>Transfer to:</b></label>
-            <select id="recipientSelect" onChange={e => setRecipient(e.target.value)} defaultValue={"Bank"}>
-                {otherPlayers.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
-            <label htmlFor="transferToAmount"><b>amount:</b></label>
-            <input id="transferToAmount" type="number" min={1} placeholder="Enter amount to transfer" value={transferAmount} onChange={e => setTransferAmount(e.target.value)}/>
+            <div>
+                <label id="recipientLabel" htmlFor="recipientSelect"><b>Transfer to</b></label>
+                <select id="recipientSelect" onChange={e => setRecipient(e.target.value)} defaultValue={"Bank"}>
+                    {otherPlayers.map(p => <option key={p} value={p}>{p}</option>)}
+                </select>
+            </div>
+            <input id="transferToAmount"
+                   className="amountInput"
+                   type="number"
+                   min={1}
+                   placeholder="Enter amount to transfer"
+                   value={transferAmount}
+                   onChange={e => setTransferAmount(e.target.value)}/>
             <button onClick={() => transfer()}>Transfer</button>
             {error && <span className="error">{error}</span>}
         </div>

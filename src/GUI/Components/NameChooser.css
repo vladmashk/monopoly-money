@@ -5,8 +5,3 @@
 #nameInput {
     margin-bottom: 4px;
 }
-
-#buttonDiv {
-    display: flex;
-    justify-content: flex-end;
-}

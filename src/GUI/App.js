@@ -7,12 +7,19 @@ function App() {
 
     const [name, setName] = useState("");
 
-    return (
-        <div className="App">
-            <NameChooser setName={setName}/>
-            {name && <Main name={name}/>}
-        </div>
-    );
+    if (name) {
+        return (
+            <div className="App">
+                <Main name={name}/>
+            </div>
+        );
+    } else {
+        return (
+            <div className="App AppMiddle">
+                <NameChooser setName={setName}/>
+            </div>
+        );
+    }
 }
 
 export default App;
