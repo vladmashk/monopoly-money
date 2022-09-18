@@ -1,3 +1,3 @@
-const startingAmount = 1000;
+const startingAmount = 15000000;
 
 export default startingAmount;
