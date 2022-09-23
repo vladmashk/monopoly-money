@@ -23,14 +23,29 @@ class Client {
      */
     state = {};
 
+    connected = true;
+
+    reconnectAttempts = 0;
+
     constructor() {
         this.socket.on("connect_error", () => {
-            console.error("Couldn't connect!");
-            this.socket.disconnect();
+            this.setConnected(false);
+            this.reconnectAttempts++;
+            if (this.reconnectAttempts > 25) {
+                this.socket.disconnect();
+            }
         });
 
         this.socket.on("connect", () => {
+            this.setConnected(true);
             console.log("Connected to server!");
+            if (this.name) {
+                this.addPlayer(this.name);
+            }
+        });
+
+        this.socket.on("disconnect", () => {
+            this.setConnected(false);
         });
 
         this.socket.on(comm.UPDATE_STATE, (state) => this.setState(state));
@@ -71,11 +86,7 @@ class Client {
      * @return {boolean}
      */
     transferTo(amount, recipient) {
-        if (this.money - amount < 0 || !this.players.has(recipient)) {
-            return false;
-        }
         this.socket.emit(comm.TRANSFER, {amount: amount, from: this.name, to: recipient});
-        return true;
     }
 
     transferFromBank(amount) {
@@ -109,12 +120,19 @@ class Client {
         this.updateState(state);
     }
 
+    setConnected(connected) {
+        this.connected = connected;
+        this.updateConnected(connected);
+    }
+
     /**
      * @param {number} money
      */
     updateMoney(money) {}
 
     updateState(state) {}
+
+    updateConnected(connected) {}
 
     /**
      *

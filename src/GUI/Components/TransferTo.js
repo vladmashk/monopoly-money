@@ -27,10 +27,7 @@ function TransferTo(props) {
             showError("Invalid amount");
             return;
         }
-        if (!client.transferTo(amount, recipient)) {
-            showError("Transfer failed");
-            return;
-        }
+        client.transferTo(amount, recipient);
         setTransferAmount("");
     }
 

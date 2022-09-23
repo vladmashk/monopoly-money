@@ -35,7 +35,8 @@ class Server {
         }
 
         this.server.on("connection", (socket) => {
-            console.log("Client connected:", socket.id, socket.handshake.address);
+            //const possiblePlayer = [...this.players.values()].find(p => p.socket.handsha)
+            console.log(`[Socket connected: ${socket.handshake.address}]`);
 
             socket.on(comm.ADD_PLAYER, (name, respond) => {
                 const result = this.addPlayer(name);
@@ -43,9 +44,10 @@ class Server {
                 if (result) {
                     const player = this.players.get(name);
                     player.socket = socket;
+                    console.log(`Connected: ${player.name} (ip: ${player.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}`);
                     setTimeout(() => {
                         this.updateState();
-                    }, 100);
+                    }, 200);
                 }
 
                 socket.on(comm.VOTE, ({id, vote}) => {
@@ -53,11 +55,13 @@ class Server {
                 });
             });
 
-            socket.on("disconnect", () => {
+            socket.on("disconnect", (reason) => {
                 const leaver = [...this.players.values()].find(p => p.socket === socket);
                 if (!leaver) {
+                    console.log(`[Socket disconnected, reason: ${reason}]`)
                     return;
                 }
+                console.log(`Disconnected: ${leaver.name} (ip: ${leaver.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}`);
                 leaver.setConnected(false);
                 this.updateState();
             });
@@ -136,7 +140,7 @@ class Server {
             player.emit(comm.START_VOTE, {id, amount, recipient});
         }
         setTimeout(() => this.endVote(id), 15 * 1000);
-        console.log("Started vote", id);
+        console.log(`Started vote ${id}: ${recipient} gets ${amount}`);
     }
 
     /**
@@ -208,6 +212,10 @@ class Server {
                 console.log(err);
             }
         });
+    }
+
+    getConnectedHumanPlayersString() {
+        return [...this.players.keys()].filter(n => n !== "Bank" && this.players.get(n).isConnected()).join(", ");
     }
 }
 
