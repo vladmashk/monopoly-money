@@ -39,12 +39,12 @@ class Server {
             console.log(`[Socket connected: ${socket.handshake.address}]`);
 
             socket.on(comm.ADD_PLAYER, (name, respond) => {
-                const result = this.addPlayer(name);
+                const result = this.addPlayer(name, socket);
                 respond(result);
                 if (result) {
                     const player = this.players.get(name);
                     player.socket = socket;
-                    console.log(`Connected: ${player.name} (ip: ${player.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}`);
+                    console.log(`Connected: ${player.name} (ip: ${player.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}.`);
                     setTimeout(() => {
                         this.updateState();
                     }, 200);
@@ -61,8 +61,8 @@ class Server {
                     console.log(`[Socket disconnected, reason: ${reason}]`)
                     return;
                 }
-                console.log(`Disconnected: ${leaver.name} (ip: ${leaver.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}`);
                 leaver.setConnected(false);
+                console.log(`Disconnected: ${leaver.name} (ip: ${leaver.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}.`);
                 this.updateState();
             });
 
@@ -81,13 +81,17 @@ class Server {
 
     /**
      * @param {string} name
+     * @param {Socket} socket
      * @return {boolean}
      */
-    addPlayer(name) {
+    addPlayer(name, socket) {
         if (this.players.has(name) && this.players.get(name).isConnected()) {
             return false;
         } else if (this.players.has(name)) {
             this.players.get(name).setConnected(true);
+        } else if (!/^[a-zA-Z]+$/.test(name)) {
+            socket.emit(comm.ERROR, "Chosen name contains invalid characters!");
+            return false;
         } else if (this.savedState[name]) {
             this.players.set(name, new Player(name, this.savedState[name]));
         } else {
@@ -102,7 +106,11 @@ class Server {
      * @param {string} to
      */
     transfer(amount, from, to) {
-        if (!this.players.has(from) || !this.players.has(from) || !this.players.get(from).canReduceMoneyBy(amount)) {
+        if (!this.players.has(from) || !this.players.has(from)) {
+            return;
+        }
+        if (!this.players.get(from).canReduceMoneyBy(amount)) {
+            this.players.get(from).emit(comm.ERROR, "Not enough money!");
             return;
         }
         if (from === "Bank") {
@@ -190,21 +198,19 @@ class Server {
     /**
      * @return {Object}
      */
-    getActiveState() {
-        let activeState = {};
+    getState() {
+        let state = {};
         for (const player of this.players.values()) {
-            if (player.isConnected()) {
-                activeState[player.name] = player.money;
-            }
+                state[player.name] = player.money;
         }
-        return activeState;
+        return state;
     }
 
     updateState() {
         for (const player of this.players.values()) {
             if (player.name === "Bank")
                 continue;
-            player.updateState(this.getActiveState());
+            player.updateState(this.getState());
             this.savedState[player.name] = player.money;
         }
         fs.writeFile(savedPath, JSON.stringify(this.savedState, null, 2), (err) => {

@@ -59,6 +59,10 @@ class Client {
         this.socket.on(comm.END_VOTE, (id) => {
             this.endVote(id);
         });
+
+        this.socket.on(comm.ERROR, (error) => {
+            this.addError(error);
+        });
     }
 
     getState() {
@@ -147,6 +151,11 @@ class Client {
      * @param {number} id
      */
     endVote(id) {}
+
+    /**
+     * @param {string} errorMessage
+     */
+    addError(errorMessage) {}
 }
 
 export default Client;

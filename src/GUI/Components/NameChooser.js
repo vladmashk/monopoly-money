@@ -13,6 +13,7 @@ function NameChooser(props) {
         if (name === "") {
             return;
         }
+        name = name.trim();
         client.addPlayer(name).then(result => {
             if (result) {
                 setError("");
