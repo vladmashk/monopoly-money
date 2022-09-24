@@ -10,6 +10,12 @@ class Vote {
     amount;
 
     /**
+     * Players who have already voted.
+     * @type {Set<string>}
+     */
+    voted = new Set();
+
+    /**
      * @type {string}
      */
     recipient;
@@ -21,13 +27,23 @@ class Vote {
 
     /**
      * @param {boolean} bool
+     * @param {string} name
      */
-    vote(bool) {
+    vote(bool, name) {
         if (bool) {
             this.yea++;
         } else {
             this.nay++;
         }
+        this.voted.add(name);
+    }
+
+    /**
+     * @param {string} player
+     * @return {boolean}
+     */
+    hasVoted(player) {
+        return this.voted.has(player);
     }
 
     result() {

@@ -35,7 +35,6 @@ class Server {
         }
 
         this.server.on("connection", (socket) => {
-            //const possiblePlayer = [...this.players.values()].find(p => p.socket.handsha)
             console.log(`[Socket connected: ${socket.handshake.address}]`);
 
             socket.on(comm.ADD_PLAYER, (name, respond) => {
@@ -47,6 +46,11 @@ class Server {
                     console.log(`Connected: ${player.name} (ip: ${player.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}.`);
                     setTimeout(() => {
                         this.updateState();
+                        for (const [id, vote] of this.votesInProgress.entries()) {
+                            if (!vote.hasVoted(name)) {
+                                player.emit(comm.START_VOTE, {id, amount: vote.amount, recipient: vote.recipient});
+                            }
+                        }
                     }, 200);
                 }
 
@@ -138,7 +142,7 @@ class Server {
      * @param {string} recipient
      */
     startVote(amount, recipient) {
-        if (this.getActivePlayersAmount() === 1) {
+        if (this.getHumanPlayersAmount() === 1) {
             this.actualTransfer(amount, "Bank", recipient);
             return;
         }
@@ -147,7 +151,7 @@ class Server {
         for (const player of this.players.values()) {
             player.emit(comm.START_VOTE, {id, amount, recipient});
         }
-        setTimeout(() => this.endVote(id), 15 * 1000);
+        setTimeout(() => this.endVote(id), 20 * 1000);
         console.log(`Started vote ${id}: ${recipient} gets ${amount}`);
     }
 
@@ -180,9 +184,9 @@ class Server {
             return;
         }
         const onGoingVote = this.votesInProgress.get(id);
-        onGoingVote.vote(vote);
+        onGoingVote.vote(vote, voter);
         console.log(voter, "voted", vote, "in vote", id);
-        if (onGoingVote.totalVotes() === this.getActivePlayersAmount() - 1) {
+        if (onGoingVote.totalVotes() === this.getHumanPlayersAmount() - 1) {
             this.endVote(id);
         }
     }
@@ -191,8 +195,8 @@ class Server {
      * Excluding bank
      * @return {number}
      */
-    getActivePlayersAmount() {
-        return [...this.players.values()].filter(p => p.isConnected() && p.name !== "Bank").length;
+    getHumanPlayersAmount() {
+        return [...this.players.values()].filter(p => p.name !== "Bank").length;
     }
 
     /**
