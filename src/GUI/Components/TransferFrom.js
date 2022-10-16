@@ -13,19 +13,36 @@ function TransferFrom() {
         setTimeout(() => setError(""), 1000);
     }
 
-    function transfer() {
+    function transfer() { // TODO: extract duplicate
+        const stringAmount = transferAmount.replace(/\s/g, "");
         setError("");
-        if (transferAmount === "" || transferAmount.includes(".")) {
+        if (stringAmount === "" || stringAmount.includes(",")) {
             showError("Invalid amount");
             return;
         }
-        const amount = parseInt(transferAmount);
-        if (isNaN(amount) || amount <= 0) {
+        let numberAmount;
+        if (/^\d+\.?\d*[kKmM]$/.test(stringAmount)) {
+            const multiplier = stringAmount.slice(-1).toLowerCase() === "k" ? 1000 : 1000000;
+            numberAmount = parseFloat(stringAmount.slice(0, -1)) * multiplier;
+        } else {
+            numberAmount = parseInt(stringAmount);
+        }
+        if (isNaN(numberAmount) || numberAmount <= 0) {
             showError("Invalid amount");
             return;
         }
-        client.transferFromBank(amount);
+        client.transferFromBank(numberAmount);
         setTransferAmount("");
+    }
+
+    function formatAndSetTransferAmount(inputValue) {
+        inputValue = inputValue.replace(/\s/g, "");
+        if (/^\d+$/.test(inputValue)) {
+            const amount = parseFloat(inputValue);
+            setTransferAmount(amount.toLocaleString("en-US").replace(/,/g, " "));
+        } else {
+            setTransferAmount(inputValue);
+        }
     }
 
     return (
@@ -33,11 +50,9 @@ function TransferFrom() {
             <label htmlFor="transferFromAmount"><b>Transfer from bank</b></label>
             <input id="transferFromAmount"
                    className="amountInput"
-                   type="number"
-                   min={1}
                    placeholder="Enter amount to transfer"
                    value={transferAmount}
-                   onChange={e => setTransferAmount(e.target.value)}/>
+                   onChange={e => formatAndSetTransferAmount(e.target.value)}/>
             <button onClick={() => transfer()}>Start vote</button>
             {error && <span className="error">{error}</span>}
         </div>

@@ -17,7 +17,7 @@ function Vote(props) {
             <div className="box doubleBorder vote">
                 <div className="centeredFlex">
                     <b className="voteTitle">Vote</b>
-                    <p>Should <b>{props.recipient}</b> receive <b>{props.amount.toLocaleString("fr")}</b> from the bank?</p>
+                    <p>Should <b>{props.recipient}</b> receive <b>{props.amount.toLocaleString("en-US").replace(/,/g, " ")}</b> from the bank?</p>
                 </div>
                 <div id="buttonsDiv">
                     <button className="agree" onClick={() => vote(true)}>Yes</button>

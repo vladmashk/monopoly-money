@@ -53,7 +53,7 @@ function Main(props) {
             <p><b>{props.name}</b></p>
             <span>You have</span>
             <span id="moneyCounter" onClick={() => client.requestUpdateMoney()} title="Refresh money amount">
-                {money.toLocaleString("fr", {notation: "standard"})}
+                {money.toLocaleString("en-US", {notation: "standard"}).replace(/,/g, " ")}
             </span>
             <TransferTo otherPlayers={Object.keys(state).filter(n => n !== props.name)}/>
             <br/>
