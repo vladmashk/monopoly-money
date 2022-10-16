@@ -30,7 +30,7 @@ function App() {
         setErrors(errors => [<Error message={error} key={id} id={id}/>].concat(errors));
         setTimeout(() => {
             setErrors(errors => errors.filter(e => e.props.id !== id));
-        }, 2000);
+        }, 3000);
     }
 
     let mainContent;

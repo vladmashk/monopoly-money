@@ -6,10 +6,13 @@ import {client} from "../../index.js";
 import Vote from "./Vote.js";
 import TransferFrom from "./TransferFrom.js";
 import OtherPlayers from "./OtherPlayers.js";
+import Notification from "./Notification.js";
 
 function Main(props) {
 
     const [money, setMoney] = useState(-1);
+
+    const [notifications, setNotifications] = useState([]);
 
     const [votes, setVotes] = useState([]);
 
@@ -20,6 +23,7 @@ function Main(props) {
         client.startVote = startVote;
         client.endVote = endVote;
         client.updateState = updateState;
+        client.addNotification = addNotification;
     }, []);
 
     function updateMoney(money) {
@@ -46,8 +50,21 @@ function Main(props) {
         setState(s => state);
     }
 
+    /**
+     * @param {string} from
+     * @param {number} amount
+     */
+    function addNotification(from, amount) {
+        const id = Math.round(Math.random() * Number.MAX_SAFE_INTEGER);
+        setNotifications(n => [<Notification key={id} id={id} from={from} amount={amount}/>].concat(n));
+        setTimeout(() => {
+            setNotifications(n => n.filter(e => e.props.id !== id));
+        }, 3000);
+    }
+
     return (
         <div id="Main">
+            {notifications}
             {votes}
             <span>You are</span>
             <p><b>{props.name}</b></p>

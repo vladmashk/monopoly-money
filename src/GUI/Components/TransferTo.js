@@ -1,4 +1,4 @@
-import {client} from "../../index.js";
+import {client, formatMoney} from "../../index.js";
 import {useState} from "react";
 import "./TransferTo.css";
 import PropTypes from "prop-types";
@@ -46,7 +46,7 @@ function TransferTo(props) {
         inputValue = inputValue.replace(/\s/g, "");
         if (/^\d+$/.test(inputValue)) {
             const amount = parseFloat(inputValue);
-            setTransferAmount(amount.toLocaleString("en-US").replace(/,/g, " "));
+            setTransferAmount(formatMoney(amount));
         } else {
             setTransferAmount(inputValue);
         }

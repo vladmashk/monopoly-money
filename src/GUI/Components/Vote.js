@@ -1,7 +1,7 @@
 import "./Vote.css";
 import PropTypes from "prop-types";
 import {useState} from "react";
-import {client} from "../../index.js";
+import {client, formatMoney} from "../../index.js";
 
 function Vote(props) {
 
@@ -17,7 +17,7 @@ function Vote(props) {
             <div className="box doubleBorder vote">
                 <div className="centeredFlex">
                     <b className="voteTitle">Vote</b>
-                    <p>Should <b>{props.recipient}</b> receive <b>{props.amount.toLocaleString("en-US").replace(/,/g, " ")}</b> from the bank?</p>
+                    <p>Should <b>{props.recipient}</b> receive <b>{formatMoney(props.amount)}</b> from the bank?</p>
                 </div>
                 <div id="buttonsDiv">
                     <button className="agree" onClick={() => vote(true)}>Yes</button>

@@ -22,6 +22,10 @@ class Bank extends Player {
 
     }
 
+    sendNotification(from, amount) {
+
+    }
+
     emit(event, args, ack = undefined) {
 
     }

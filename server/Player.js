@@ -1,5 +1,5 @@
 import comm from "../src/comm.js";
-import startingAmount from "../src/startingAmount.js";
+import {startingAmount} from "../src/config.js";
 
 class Player {
 
@@ -47,6 +47,15 @@ class Player {
      */
     updateState(state) {
         this.socket.emit(comm.UPDATE_STATE, state);
+    }
+
+    /**
+     *
+     * @param {string} from
+     * @param {number} amount
+     */
+    sendNotification(from, amount) {
+        this.socket.emit(comm.NOTIFICATION, {from, amount})
     }
 
     emit(event, args, ack = undefined) {

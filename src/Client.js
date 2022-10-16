@@ -63,6 +63,10 @@ class Client {
         this.socket.on(comm.ERROR, (error) => {
             this.addError(error);
         });
+
+        this.socket.on(comm.NOTIFICATION, ({from, amount}) => {
+            this.addNotification(from, amount);
+        })
     }
 
     getState() {
@@ -156,6 +160,13 @@ class Client {
      * @param {string} errorMessage
      */
     addError(errorMessage) {}
+
+    /**
+     * @param {string} from
+     * @param {number} amount
+     */
+    addNotification(from, amount) {}
+
 }
 
 export default Client;

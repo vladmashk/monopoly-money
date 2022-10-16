@@ -11,4 +11,12 @@ root.render(
   </React.StrictMode>
 );
 
+/**
+ * @param {number} money
+ * @return {string}
+ */
+export function formatMoney(money) {
+    return money.toLocaleString("en-US").replace(/,/g, " ");
+}
+
 export const client = new Client();

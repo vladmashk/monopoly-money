@@ -135,6 +135,7 @@ class Server {
         payer.reduceMoneyBy(amount);
         payee.increaseMoneyBy(amount);
         this.updateState();
+        payee.sendNotification(from, amount);
     }
 
     /**

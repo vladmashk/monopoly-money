@@ -1,6 +1,6 @@
 import "./TransferFrom.css"
 import {useState} from "react";
-import {client} from "../../index.js";
+import {client, formatMoney} from "../../index.js";
 
 function TransferFrom() {
 
@@ -39,7 +39,7 @@ function TransferFrom() {
         inputValue = inputValue.replace(/\s/g, "");
         if (/^\d+$/.test(inputValue)) {
             const amount = parseFloat(inputValue);
-            setTransferAmount(amount.toLocaleString("en-US").replace(/,/g, " "));
+            setTransferAmount(formatMoney(amount));
         } else {
             setTransferAmount(inputValue);
         }
