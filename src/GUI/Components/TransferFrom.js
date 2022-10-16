@@ -1,6 +1,7 @@
 import "./TransferFrom.css"
 import {useState} from "react";
 import {client, formatMoney} from "../../index.js";
+import {passStartAmount} from "../../config.js";
 
 function TransferFrom() {
 
@@ -13,7 +14,14 @@ function TransferFrom() {
         setTimeout(() => setError(""), 1000);
     }
 
-    function transfer() { // TODO: extract duplicate
+    /**
+     * @param {number | null} requestedAmount
+     */
+    function transfer(requestedAmount = null) { // TODO: extract duplicate
+        if (requestedAmount) {
+            client.transferFromBank(requestedAmount);
+            return;
+        }
         const stringAmount = transferAmount.replace(/\s/g, "");
         setError("");
         if (stringAmount === "" || stringAmount.includes(",")) {
@@ -60,6 +68,9 @@ function TransferFrom() {
                    }}
             />
             <button onClick={() => transfer()}>Start vote</button>
+            <div id="passStartDiv">
+                <button onClick={() => transfer(passStartAmount)}>Passed start - Receive {formatMoney(passStartAmount)}</button>
+            </div>
             {error && <span className="error">{error}</span>}
         </div>
     );
