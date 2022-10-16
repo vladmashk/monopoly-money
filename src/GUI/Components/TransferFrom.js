@@ -52,7 +52,13 @@ function TransferFrom() {
                    className="amountInput"
                    placeholder="Enter amount to transfer"
                    value={transferAmount}
-                   onChange={e => formatAndSetTransferAmount(e.target.value)}/>
+                   onChange={e => formatAndSetTransferAmount(e.target.value)}
+                   onKeyUp={e => {
+                       if (e.key === "Enter") {
+                           transfer();
+                       }
+                   }}
+            />
             <button onClick={() => transfer()}>Start vote</button>
             {error && <span className="error">{error}</span>}
         </div>

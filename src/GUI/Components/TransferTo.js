@@ -9,6 +9,8 @@ function TransferTo(props) {
 
     const [transferAmount, setTransferAmount] = useState("");
 
+    const [checkRecipient, setCheckRecipient] = useState(false);
+
     const [error, setError] = useState("");
 
     function showError(text) {
@@ -36,9 +38,11 @@ function TransferTo(props) {
         }
         client.transferTo(numberAmount, recipient);
         setTransferAmount("");
+        setCheckRecipient(false);
     }
 
     function formatAndSetTransferAmount(inputValue) {
+        setCheckRecipient(inputValue !== "");
         inputValue = inputValue.replace(/\s/g, "");
         if (/^\d+$/.test(inputValue)) {
             const amount = parseFloat(inputValue);
@@ -55,12 +59,19 @@ function TransferTo(props) {
                 <select id="recipientSelect" onChange={e => setRecipient(e.target.value)} defaultValue={"Bank"}>
                     {props.otherPlayers.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
+                {checkRecipient && <span style={{color: "orange"}}>{" ← correct recipient?"}</span>}
             </div>
             <input id="transferToAmount"
                    className="amountInput"
                    placeholder="Enter amount to transfer"
                    value={transferAmount}
-                   onChange={e => formatAndSetTransferAmount(e.target.value)}/>
+                   onChange={e => formatAndSetTransferAmount(e.target.value)}
+                   onKeyUp={e => {
+                       if (e.key === "Enter") {
+                           transfer();
+                       }
+                   }}
+            />
             <button onClick={() => transfer()}>Transfer</button>
             {error && <span className="error">{error}</span>}
         </div>
