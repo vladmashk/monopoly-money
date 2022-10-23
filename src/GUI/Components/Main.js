@@ -46,8 +46,8 @@ function Main(props) {
         setVotes(votes => votes.filter(v => v.props.id !== id));
     }
 
-    function updateState(state) {
-        setState(s => state);
+    function updateState() {
+        setState(s => client.getState());
     }
 
     /**

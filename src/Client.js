@@ -69,10 +69,6 @@ class Client {
         })
     }
 
-    getState() {
-        return this.state;
-    }
-
     /**
      * @param {string} name
      * @return {Promise<boolean>}
@@ -114,6 +110,10 @@ class Client {
         this.socket.emit(comm.VOTE, {id, vote});
     }
 
+    getState() {
+        return this.state;
+    }
+
     /**
      * @param {Object} state is {name1: money1, name2: money2, ...}
      */
@@ -125,7 +125,7 @@ class Client {
         this.updateMoney(this.money);
         delete state[this.name];
         this.state = state;
-        this.updateState(state);
+        this.updateState();
     }
 
     setConnected(connected) {
@@ -138,7 +138,7 @@ class Client {
      */
     updateMoney(money) {}
 
-    updateState(state) {}
+    updateState() {}
 
     updateConnected(connected) {}
 
