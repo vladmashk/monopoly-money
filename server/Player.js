@@ -46,16 +46,23 @@ class Player {
      * @param {Object} state
      */
     updateState(state) {
-        this.socket.emit(comm.UPDATE_STATE, state);
+        this.socket.emit(comm.UPDATE_TRANSACTIONS, state);
     }
 
     /**
      *
-     * @param {string} from
-     * @param {number} amount
+     * @param {{from: string, to: string, amount: number}[]} transactions
      */
-    sendNotification(from, amount) {
-        this.socket.emit(comm.NOTIFICATION, {from, amount})
+    sendTransactions(transactions) {
+        this.socket.emit(comm.UPDATE_TRANSACTIONS, transactions);
+    }
+
+    /**
+     *
+     * @param {{from: string, to: string, amount: number}} transfer
+     */
+    sendTransfer(transfer) {
+        this.socket.emit(comm.TRANSFER, transfer);
     }
 
     emit(event, args, ack = undefined) {

@@ -20,18 +20,19 @@ class Server {
     players = new Map([["Bank", new Bank()]]);
 
     /**
+     * All transactions that happened.
+     * @type {{from: string, to: string, amount: number}[]}
+     */
+    transactions = [];
+
+    /**
      * @type {Map<number, Vote>}
      */
     votesInProgress = new Map();
 
-    /**
-     * @type {object}
-     */
-    savedState = {};
-
     constructor() {
         if (fs.existsSync(savedPath)) {
-            this.savedState = JSON.parse(fs.readFileSync(savedPath).toString());
+            this.transactions = JSON.parse(fs.readFileSync(savedPath).toString());
         }
 
         this.server.on("connection", (socket) => {
@@ -45,7 +46,7 @@ class Server {
                     player.socket = socket;
                     console.log(`Connected: ${player.name} (ip: ${player.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}.`);
                     setTimeout(() => {
-                        this.updateState();
+                        player.sendTransactions(this.transactions);
                         for (const [id, vote] of this.votesInProgress.entries()) {
                             if (!vote.hasVoted(name)) {
                                 player.emit(comm.START_VOTE, {id, amount: vote.amount, recipient: vote.recipient});
@@ -67,15 +68,15 @@ class Server {
                 }
                 leaver.setConnected(false);
                 console.log(`Disconnected: ${leaver.name} (ip: ${leaver.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}.`);
-                this.updateState();
+                // this.updateState(); // TODO: is this even necessary?
             });
 
-            socket.on(comm.REQUEST_UPDATE_STATE, () => {
-                this.updateState();
+            socket.on(comm.REQUEST_UPDATE_TRANSACTIONS, (name) => {
+                this.players.get(name).sendTransactions(this.transactions);
             });
 
             socket.on(comm.TRANSFER, ({ amount, from, to }) => {
-                this.transfer(amount, from, to);
+                this.transfer(from, to, amount);
             });
         });
 
@@ -96,8 +97,8 @@ class Server {
         } else if (!/^[a-zA-Z]+$/.test(name)) {
             socket.emit(comm.ERROR, "Chosen name contains invalid characters!");
             return false;
-        } else if (this.savedState[name]) {
-            this.players.set(name, new Player(name, this.savedState[name]));
+        } else if (this.playerExistsInTransactions(name)) {
+            this.players.set(name, new Player(name, this.getMoneyFromTransactions(name)));
         } else {
             this.players.set(name, new Player(name));
         }
@@ -105,12 +106,52 @@ class Server {
     }
 
     /**
-     * @param {number} amount
+     *
+     * @param {string} name
+     * @return {boolean}
+     */
+    playerExistsInTransactions(name) {
+        return this.transactions.some(t => t.to === name);
+    }
+
+    /**
+     *
+     * @param {string} playerName
+     * @return {number}
+     */
+    getMoneyFromTransactions(playerName) {
+        return this.transactions.reduce((money, currentTransaction) => {
+            if (currentTransaction.to === playerName) {
+                return money + currentTransaction.amount;
+            } else if (currentTransaction.from === playerName) {
+                return money - currentTransaction.amount;
+            } else {
+                return money;
+            }
+        }, 0)
+    }
+
+    /**
      * @param {string} from
      * @param {string} to
+     * @param {number} amount
      */
-    transfer(amount, from, to) {
-        if (!this.players.has(from) || !this.players.has(from)) {
+    addTransaction(from, to, amount) {
+        this.transactions.push({from, to, amount});
+        fs.writeFile(savedPath, JSON.stringify(this.transactions, null, 2), (err) => {
+            if (err) {
+                console.error(err);
+            }
+        });
+    }
+
+    /**
+     * @param {string} from
+     * @param {string} to
+     * @param {number} amount
+     */
+    transfer(from, to, amount) {
+        if (!this.players.has(from) || !this.players.has(to)) {
             return;
         }
         if (!this.players.get(from).canReduceMoneyBy(amount)) {
@@ -121,21 +162,23 @@ class Server {
             this.startVote(amount, to);
             return;
         }
-        this.actualTransfer(amount, from, to);
+        this.actualTransfer(from, to, amount);
     }
 
     /**
-     * @param {number} amount
      * @param {string} from
      * @param {string} to
+     * @param {number} amount
      */
-    actualTransfer(amount, from, to) {
+    actualTransfer(from, to, amount) {
         const payer = this.players.get(from);
         const payee = this.players.get(to);
         payer.reduceMoneyBy(amount);
         payee.increaseMoneyBy(amount);
-        this.updateState();
-        payee.sendNotification(from, amount);
+        this.addTransaction(from, to, amount);
+        for (const player of this.players.values()) {
+            player.sendTransfer({from, to, amount});
+        }
     }
 
     /**
@@ -144,7 +187,7 @@ class Server {
      */
     startVote(amount, recipient) {
         if (this.getHumanPlayersAmount() === 1) {
-            this.actualTransfer(amount, "Bank", recipient);
+            this.actualTransfer("Bank", recipient, amount);
             return;
         }
         const id = Math.round(Math.random() * Number.MAX_SAFE_INTEGER);
@@ -168,7 +211,7 @@ class Server {
         }
         const onGoingVote = this.votesInProgress.get(id);
         if (onGoingVote.result()) {
-            this.actualTransfer(onGoingVote.amount, "Bank", onGoingVote.recipient);
+            this.actualTransfer("Bank", onGoingVote.recipient, onGoingVote.amount);
         }
         this.votesInProgress.delete(id);
         console.log("Ended vote", id);
@@ -200,34 +243,31 @@ class Server {
         return [...this.players.values()].filter(p => p.name !== "Bank").length;
     }
 
-    /**
-     * @return {Object}
-     */
-    getState() {
-        let state = {};
-        for (const player of this.players.values()) {
-                state[player.name] = player.money;
-        }
-        return state;
-    }
-
-    updateState() {
-        for (const player of this.players.values()) {
-            if (player.name === "Bank")
-                continue;
-            player.updateState(this.getState());
-            this.savedState[player.name] = player.money;
-        }
-        fs.writeFile(savedPath, JSON.stringify(this.savedState, null, 2), (err) => {
-            if (err) {
-                console.log(err);
-            }
-        });
-    }
-
     getConnectedHumanPlayersString() {
         return [...this.players.keys()].filter(n => n !== "Bank" && this.players.get(n).isConnected()).join(", ");
     }
+
+    setPlayersBasedOnTransactions() {
+        let players = new Map();
+        for (const t of this.transactions) {
+            if (players.get(t.from)) {
+                players.get(t.from).reduceMoneyBy(t.amount);
+            } else if (t.from === "Bank") {
+                players.set(t.from, new Bank());
+            } else {
+                players.set(t.from, new Player(t.from, -t.amount));
+            }
+            if (players.get(t.to)) {
+                players.get(t.to).increaseMoneyBy(t.amount);
+            } else if (t.to === "Bank") {
+                players.set(t.to, new Bank());
+            } else {
+                players.set(t.to, new Player(t.to, t.amount));
+            }
+        }
+        this.players = players;
+    }
+
 }
 
 new Server();

@@ -17,6 +17,12 @@ class Client {
      */
     players = new Map();
 
+    /**
+     *
+     * @type {{from: string, to: string, amount: number}[]}
+     */
+    transactions = [];
+
     connected = true;
 
     reconnectAttempts = 0;
@@ -31,6 +37,7 @@ class Client {
         });
 
         this.socket.on("connect", () => {
+            this.reconnectAttempts = 0;
             this.setConnected(true);
             console.log("Connected to server!");
             if (this.name) {
@@ -42,7 +49,19 @@ class Client {
             this.setConnected(false);
         });
 
-        this.socket.on(comm.UPDATE_STATE, (state) => this.setState(state));
+        this.socket.on(comm.UPDATE_TRANSACTIONS, (transactions) => this.setTransactions(transactions));
+
+        this.socket.on(comm.TRANSFER, ({from, to, amount}) => {
+            this.addTransaction(from, to, amount);
+            this.players.set(from, this.players.get(from) ? this.players.get(from) - amount : -amount);
+            this.players.set(to, this.players.get(to) ? this.players.get(to) + amount : amount);
+            this.money = this.players.get(this.name);
+            this.updateMoney(this.money);
+            this.updateState();
+            if (to === this.name) {
+                this.addNotification(from, amount);
+            }
+        })
 
         this.socket.on(comm.START_VOTE, ({id, recipient, amount}) => {
             if (recipient !== this.name) {
@@ -57,10 +76,6 @@ class Client {
         this.socket.on(comm.ERROR, (error) => {
             this.addError(error);
         });
-
-        this.socket.on(comm.NOTIFICATION, ({from, amount}) => {
-            this.addNotification(from, amount);
-        })
     }
 
     /**
@@ -92,7 +107,7 @@ class Client {
     }
 
     requestUpdateMoney() {
-        this.socket.emit(comm.REQUEST_UPDATE_STATE);
+        this.socket.emit(comm.REQUEST_UPDATE_TRANSACTIONS, this.name);
     }
 
     /**
@@ -111,15 +126,32 @@ class Client {
     }
 
     /**
-     * @param {Object} state is {name1: money1, name2: money2, ...}
+     * @param {{from: string, to: string, amount: number}[]} transactions
      */
-    setState(state) {
-        this.money = state[this.name];
-        for (const [name, money] of Object.entries(state)) {
-            this.players.set(name, money);
-        }
+    setTransactions(transactions) {
+        this.transactions = transactions;
+        this.setPlayersBasedOnTransactions();
+        this.money = this.players.get(this.name);
         this.updateMoney(this.money);
         this.updateState();
+    }
+
+    /**
+     * @param {string} from
+     * @param {string} to
+     * @param {number} amount
+     */
+    addTransaction(from, to, amount) {
+        this.transactions.push({from, to, amount});
+    }
+
+    setPlayersBasedOnTransactions() {
+        let players = new Map();
+        for (const t of this.transactions) {
+            players.set(t.from, players.get(t.from) ? players.get(t.from) - t.amount : -t.amount);
+            players.set(t.to, players.get(t.to) ? players.get(t.to) + t.amount : t.amount);
+        }
+        this.players = players;
     }
 
     setConnected(connected) {

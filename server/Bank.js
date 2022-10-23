@@ -22,7 +22,11 @@ class Bank extends Player {
 
     }
 
-    sendNotification(from, amount) {
+    sendTransactions(transactions) {
+
+    }
+
+    sendTransfer(transfer) {
 
     }
 
