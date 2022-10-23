@@ -17,12 +17,6 @@ class Client {
      */
     players = new Map();
 
-    /**
-     * Other player state
-     * @type {Object}
-     */
-    state = {};
-
     connected = true;
 
     reconnectAttempts = 0;
@@ -111,7 +105,9 @@ class Client {
     }
 
     getState() {
-        return this.state;
+        let state = Object.fromEntries(this.players);
+        delete state[this.name];
+        return state;
     }
 
     /**
@@ -123,8 +119,6 @@ class Client {
             this.players.set(name, money);
         }
         this.updateMoney(this.money);
-        delete state[this.name];
-        this.state = state;
         this.updateState();
     }
 
