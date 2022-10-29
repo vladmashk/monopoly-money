@@ -44,7 +44,7 @@ function App() {
     return (
         <div className={"App" + (name ? "" : " AppMiddle")}>
             {errors}
-            {connected ? <span className="green">Connected</span> : <span className="red">Disconnected</span>}
+            {connected ? <span id="greenConnected">Connected</span> : <span id="redDisconnected">Disconnected</span>}
             {mainContent}
         </div>
     );

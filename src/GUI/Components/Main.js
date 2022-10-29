@@ -83,7 +83,7 @@ function Main(props) {
             {notifications}
             {votes}
             <span>You are</span>
-            <p><b>{props.name}</b></p>
+            <b id="namePlate">{props.name}</b>
             <span>You have</span>
             <span id="moneyCounter" onClick={() => client.requestUpdateMoney()} title="Refresh money amount">
                 {money.toLocaleString("en-US", {notation: "standard"}).replace(/,/g, " ")}

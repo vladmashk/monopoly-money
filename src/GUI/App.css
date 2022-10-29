@@ -35,13 +35,19 @@
     margin-bottom: 5px;
 }
 
-.green {
+#greenConnected {
     color: green;
+    border: 1px solid green;
+    border-radius: 8px;
+    padding: 0 3px;
     margin-bottom: 5px;
 }
 
-.red {
+#redDisconnected {
     color: red;
+    border: 1px solid red;
+    border-radius: 8px;
+    padding: 0 3px;
     margin-bottom: 5px;
 }
 
