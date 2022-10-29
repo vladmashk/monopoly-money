@@ -28,6 +28,7 @@ function App() {
     function addError(error) {
         const id = Math.round(Math.random() * Number.MAX_SAFE_INTEGER);
         setErrors(errors => [<Error message={error} key={id} id={id}/>].concat(errors));
+        window.scrollTo(0, 0);
         setTimeout(() => {
             setErrors(errors => errors.filter(e => e.props.id !== id));
         }, 3000);

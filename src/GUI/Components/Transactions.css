@@ -4,20 +4,34 @@
 }
 
 .money {
-    font-weight: bold;
     text-align: end;
     min-width: fit-content;
     white-space: nowrap;
 }
 
-#transactionsTable tr:nth-child(odd) {
+#transactionsTable tbody tr:nth-child(odd) {
     background-color: rgba(0, 0, 0, 0.1);
 }
 
 #transactionsTable td {
-    width: 18%;
+    width: 22%;
+}
+
+#transactionsTable thead {
+    border-bottom: 1px solid black;
+    font-weight: bold;
 }
 
 #transactionsTable .transactionNb {
-    width: 5%
+    width: 10%
+}
+
+.boldGreen {
+    color: green;
+    font-weight: bold;
+}
+
+.boldRed {
+    color: red;
+    font-weight: bold;
 }

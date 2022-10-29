@@ -93,6 +93,7 @@ class Server {
             return false;
         } else if (this.players.has(name)) {
             this.players.get(name).setConnected(true);
+            this.players.get(name).socket = socket;
         } else if (!/^[a-z A-Z]+$/.test(name)) {
             socket.emit(comm.ERROR, "Chosen name contains invalid characters!");
             return false;
@@ -151,7 +152,11 @@ class Server {
      * @param {number} amount
      */
     transfer(from, to, amount) {
-        if (!this.players.has(from) || !this.players.has(to)) {
+        if (!this.players.has(from)) {
+            return;
+        }
+        if (!this.players.has(to)) {
+            this.players.get(from).emit(comm.ERROR, "This player has not (yet) been connected!");
             return;
         }
         if (!this.players.get(from).canReduceMoneyBy(amount)) {

@@ -78,6 +78,10 @@ class Client {
         });
     }
 
+    getName() {
+        return this.name;
+    }
+
     /**
      * @param {string} name
      * @return {Promise<boolean>}

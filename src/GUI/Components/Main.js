@@ -41,6 +41,7 @@ function Main(props) {
      */
     function startVote(id, recipient, amount) {
         setVotes(votes => [<Vote key={id} id={id} recipient={recipient} amount={amount}/>].concat(votes));
+        window.scrollTo(0, 0)
     }
 
     /**
