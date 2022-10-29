@@ -7,6 +7,7 @@ import Vote from "./Vote.js";
 import TransferFrom from "./TransferFrom.js";
 import OtherPlayers from "./OtherPlayers.js";
 import Notification from "./Notification.js";
+import Transactions from "./Transactions.js";
 
 function Main(props) {
 
@@ -18,12 +19,15 @@ function Main(props) {
 
     const [state, setState] = useState(client.getState());
 
+    const [transactions, setTransactions] = useState([])
+
     useEffect(() => {
         client.updateMoney = updateMoney;
         client.startVote = startVote;
         client.endVote = endVote;
         client.updateState = updateState;
         client.addNotification = addNotification;
+        client.updateTransactions = updateTransactions;
     }, []);
 
     function updateMoney(money) {
@@ -46,8 +50,12 @@ function Main(props) {
         setVotes(votes => votes.filter(v => v.props.id !== id));
     }
 
-    function updateState() {
-        setState(s => client.getState());
+    /**
+     *
+     * @param {{[name: string]: number}} state
+     */
+    function updateState(state) {
+        setState(s => state);
     }
 
     /**
@@ -60,6 +68,13 @@ function Main(props) {
         setTimeout(() => {
             setNotifications(n => n.filter(e => e.props.id !== id));
         }, 3000);
+    }
+
+    /**
+     * @param {{from: string, to: string, amount: number}[]} transactions
+     */
+    function updateTransactions(transactions) {
+        setTransactions(t => transactions)
     }
 
     return (
@@ -77,6 +92,8 @@ function Main(props) {
             <TransferFrom/>
             <br/>
             <OtherPlayers state={state}/>
+            <br/>
+            <Transactions transactions={transactions}/>
         </div>
     );
 }

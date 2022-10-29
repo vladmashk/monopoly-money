@@ -5,6 +5,7 @@ import comm from "../src/comm.js";
 import Player from "./Player.js";
 import Bank from "./Bank.js";
 import Vote from "./Vote.js";
+import {startingAmount} from "../src/config.js";
 
 const savedPath = "./saved.json";
 
@@ -43,7 +44,6 @@ class Server {
                 respond(result);
                 if (result) {
                     const player = this.players.get(name);
-                    player.socket = socket;
                     console.log(`Connected: ${player.name} (ip: ${player.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}.`);
                     setTimeout(() => {
                         player.sendTransactions(this.transactions);
@@ -68,7 +68,6 @@ class Server {
                 }
                 leaver.setConnected(false);
                 console.log(`Disconnected: ${leaver.name} (ip: ${leaver.socket.handshake.address}). Connected players: ${this.getConnectedHumanPlayersString()}.`);
-                // this.updateState(); // TODO: is this even necessary?
             });
 
             socket.on(comm.REQUEST_UPDATE_TRANSACTIONS, (name) => {
@@ -94,13 +93,14 @@ class Server {
             return false;
         } else if (this.players.has(name)) {
             this.players.get(name).setConnected(true);
-        } else if (!/^[a-zA-Z]+$/.test(name)) {
+        } else if (!/^[a-z A-Z]+$/.test(name)) {
             socket.emit(comm.ERROR, "Chosen name contains invalid characters!");
             return false;
         } else if (this.playerExistsInTransactions(name)) {
-            this.players.set(name, new Player(name, this.getMoneyFromTransactions(name)));
+            this.players.set(name, new Player(name, socket, this.getMoneyFromTransactions(name)));
         } else {
-            this.players.set(name, new Player(name));
+            this.players.set(name, new Player(name, socket, startingAmount));
+            this.actualTransfer("Bank", name, startingAmount);
         }
         return true;
     }
@@ -245,27 +245,6 @@ class Server {
 
     getConnectedHumanPlayersString() {
         return [...this.players.keys()].filter(n => n !== "Bank" && this.players.get(n).isConnected()).join(", ");
-    }
-
-    setPlayersBasedOnTransactions() {
-        let players = new Map();
-        for (const t of this.transactions) {
-            if (players.get(t.from)) {
-                players.get(t.from).reduceMoneyBy(t.amount);
-            } else if (t.from === "Bank") {
-                players.set(t.from, new Bank());
-            } else {
-                players.set(t.from, new Player(t.from, -t.amount));
-            }
-            if (players.get(t.to)) {
-                players.get(t.to).increaseMoneyBy(t.amount);
-            } else if (t.to === "Bank") {
-                players.set(t.to, new Bank());
-            } else {
-                players.set(t.to, new Player(t.to, t.amount));
-            }
-        }
-        this.players = players;
     }
 
 }

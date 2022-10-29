@@ -5,7 +5,7 @@ import {formatMoney} from "../../index.js";
 function OtherPlayers(props) {
     return (
         <div className="box">
-            <b id="otherPlayersTitle">Other players</b>
+            <b className="boxTitle">Other players</b>
             {Object.keys(props.state).filter(n => n !== "Bank")
                 .map(n => <span className="otherPlayer" key={n}><span>{n}</span><span>{formatMoney(props.state[n])}</span></span>)}
         </div>

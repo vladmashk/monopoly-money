@@ -17,8 +17,9 @@ class Player {
      */
     socket;
 
-    constructor(name, money = startingAmount) {
+    constructor(name, socket, money) {
         this.name = name;
+        this.socket = socket;
         this.money = money;
     }
 

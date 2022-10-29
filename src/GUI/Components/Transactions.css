@@ -1,0 +1,23 @@
+#transactionsTable {
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.money {
+    font-weight: bold;
+    text-align: end;
+    min-width: fit-content;
+    white-space: nowrap;
+}
+
+#transactionsTable tr:nth-child(odd) {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+#transactionsTable td {
+    width: 18%;
+}
+
+#transactionsTable .transactionNb {
+    width: 5%
+}

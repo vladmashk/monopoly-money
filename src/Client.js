@@ -57,7 +57,7 @@ class Client {
             this.players.set(to, this.players.get(to) ? this.players.get(to) + amount : amount);
             this.money = this.players.get(this.name);
             this.updateMoney(this.money);
-            this.updateState();
+            this.updateState(this.getState());
             if (to === this.name) {
                 this.addNotification(from, amount);
             }
@@ -119,6 +119,9 @@ class Client {
         this.socket.emit(comm.VOTE, {id, vote});
     }
 
+    /**
+     * @return {{[name: string]: number}}
+     */
     getState() {
         let state = Object.fromEntries(this.players);
         delete state[this.name];
@@ -133,7 +136,8 @@ class Client {
         this.setPlayersBasedOnTransactions();
         this.money = this.players.get(this.name);
         this.updateMoney(this.money);
-        this.updateState();
+        this.updateState(this.getState());
+        this.updateTransactions(this.transactions);
     }
 
     /**
@@ -143,6 +147,7 @@ class Client {
      */
     addTransaction(from, to, amount) {
         this.transactions.push({from, to, amount});
+        this.updateTransactions(this.transactions);
     }
 
     setPlayersBasedOnTransactions() {
@@ -154,6 +159,9 @@ class Client {
         this.players = players;
     }
 
+    /**
+     * @param {boolean} connected
+     */
     setConnected(connected) {
         this.connected = connected;
         this.updateConnected(connected);
@@ -164,8 +172,19 @@ class Client {
      */
     updateMoney(money) {}
 
-    updateState() {}
+    /**
+     * @param {{[name: string]: number}} state
+     */
+    updateState(state) {}
 
+    /**
+     * @param {{from: string, to: string, amount: number}[]} transactions
+     */
+    updateTransactions(transactions) {}
+
+    /**
+     * @param {boolean} connected
+     */
     updateConnected(connected) {}
 
     /**
