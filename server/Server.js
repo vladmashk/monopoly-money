@@ -31,6 +31,8 @@ class Server {
      */
     votesInProgress = new Map();
 
+    lastBackupTime = Date.now();
+
     constructor() {
         if (fs.existsSync(savedPath)) {
             this.transactions = JSON.parse(fs.readFileSync(savedPath).toString());
@@ -139,11 +141,11 @@ class Server {
      */
     addTransaction(from, to, amount) {
         this.transactions.push({from, to, amount});
-        fs.writeFile(savedPath, JSON.stringify(this.transactions, null, 2), (err) => {
-            if (err) {
-                console.error(err);
-            }
-        });
+        fs.writeFileSync(savedPath, JSON.stringify(this.transactions, null, 2));
+        if (Date.now() > this.lastBackupTime + 1000 * 60 * 10) {
+            const backup = new Date() + "\n" + [...this.players.entries()].map(e => `${e[0]} has ${e[1].money}`).join("\n")
+            fs.writeFileSync("./backup/backup.txt", backup);
+        }
     }
 
     /**

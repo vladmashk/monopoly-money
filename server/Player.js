@@ -1,5 +1,4 @@
 import comm from "../src/comm.js";
-import {startingAmount} from "../src/config.js";
 
 class Player {
 
@@ -41,13 +40,6 @@ class Player {
 
     reduceMoneyBy(amount) {
         this.money -= amount;
-    }
-
-    /**
-     * @param {Object} state
-     */
-    updateState(state) {
-        this.socket.emit(comm.UPDATE_TRANSACTIONS, state);
     }
 
     /**
